@@ -501,4 +501,99 @@ def day6p2():
     print(total)
 
 
-day6p2()
+def day7():
+    f = open("day7.txt", "r")
+    data = f.read()
+    # Split by line first
+    lines = data.split("\n")
+    # Store the target and numbers in separate arrays
+    targets = []
+    numsets = []
+    for l in lines:
+        # Split into each set of numbers
+        l = l.split(':')
+        # Store the target
+        targets.append(int(l[0]))
+        # Store the rest (1: for avoiding an empty entry)
+        l = l[1].split(" ")[1:]
+        nums = []
+        for num in l:
+            nums.append(int(num))
+        numsets.append(nums)
+    # All non-zero values, can get funky with it
+    # Maybe check multiplication first and then do addition?
+    total1 = 0
+    total2 = 0
+    for i in range(len(targets)):
+        print("%d/%d" % (i, len(targets)))
+        # Store targets and nums
+        t = targets[i]
+        nums = numsets[i]
+        # Start with all plus and multiply from there
+        # if tryTwoOps(t, nums):
+        #    total1 += t
+        #    total2 += t
+        if tryThreeOps(t, nums):
+            total2 += t
+    print("P1: %d" % total1)
+    print("P2: %d" % total2)
+
+
+def tryTwoOps(t, nums):
+    # Store flags for each (binary number)
+    flagbase = "{:0%db}" % (len(nums) - 1)
+    # Loop through each number set
+    for i in range(2**(len(nums) - 1)):
+        # Start with plus
+        flags = flagbase.format(i)
+        total = nums[0]
+        for j in range(len(nums) - 1):
+            if int(flags[j]):
+                # Addition
+                total += nums[j + 1]
+            else:
+                # Multiply
+                total *= nums[j + 1]
+        # Check total
+        if total == t:
+            # It matches!
+            return True
+    # None found
+    return False
+
+
+def tryThreeOps(t, nums):
+    # Loop through each number set
+    for i in range(3**(len(nums) - 1)):
+        # Start with plus
+        flags = tripleBinary(i, len(nums) * 3)
+        total = nums[0]
+        for j in range(len(nums) - 1):
+            match flags[j]:
+                case '0':
+                    # Addition
+                    total += nums[j + 1]
+                case '1':
+                    # Multiply
+                    total *= nums[j + 1]
+                case '2':
+                    # Append
+                    total = int(str(total) + str(nums[j+1]))
+        # Check total
+        if total == t:
+            # It matches!
+            return True
+    # None found
+    return False
+
+
+def tripleBinary(n, max):
+    # I know this is extremely messy please give me patience
+    flags = [0] * ((max // 3) - 1)
+    flags[0] = n % 3
+    for i in range(1, (max // 3) - 1):
+        flags[i] = (n//(3 ** i)) % 3
+    return ''.join(str(x) for x in flags)
+
+
+day7()
