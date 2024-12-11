@@ -1,5 +1,6 @@
 import re
 import math
+import copy
 
 
 def day1p1():
@@ -354,4 +355,150 @@ def day5p2():
     print(sum)
 
 
-day5p2()
+def day6p1():
+    f = open("day6.txt", "r")
+    data = f.read()
+    # Split by line first
+    lines = data.split("\n")
+    # Then split each line into chars
+    for i in range(len(lines)):
+        lines[i] = list(lines[i])
+    # Now look for our starting point and set the direction
+    # Lists are in order of [y, x]
+    dirs = [[-1, 0], [0, 1], [1, 0], [0, -1]]
+    idx = 0
+    c = [0, 0]
+    i = 0
+    j = 0
+    # Using while loops so I can just do an easy break at the end
+    while i < len(lines):
+        j = 0
+        while j < len(lines[0]):
+            if lines[i][j] == '^':
+                c = [i, j]
+                i = len(lines)
+                j = len(lines)
+            j += 1
+        i += 1
+    # We have the start, now start exploring!
+    total = 1
+    oob = False
+    while not oob:
+        dir = dirs[idx]
+        # Add the current cell and mark it
+        if lines[c[0]][c[1]] == '.':
+            total += 1
+            lines[c[0]][c[1]] = 'X'
+        # See if we're out of bounds
+        if (c[0] + dir[0]) >= len(lines) or (c[1] + dir[1]) >= len(lines[0]) or (c[0] + dir[0]) < 0 or (c[1] + dir[1]) < 0:
+            oob = True
+        # See if we hit a wall
+        elif lines[c[0] + dir[0]][c[1] + dir[1]] == '#':
+            # Mark the new direction
+            idx = (idx + 1) % 4
+            dir = dirs[idx]
+        # Iterate the coordinates in the given direction
+        c = [c[0] + dir[0], c[1] + dir[1]]
+    print(total)
+
+
+def day6p2():
+    f = open("day6.txt", "r")
+    data = f.read()
+    # Split by line first
+    lines = data.split("\n")
+    # Then split each line into chars
+    for i in range(len(lines)):
+        lines[i] = list(lines[i])
+    # Now look for our starting point and set the direction
+    # Lists are in order of [y, x]
+    dirs = [[-1, 0], [0, 1], [1, 0], [0, -1]]
+    idx = 0
+    c = [0, 0]
+    i = 0
+    j = 0
+    # Using while loops so I can just do an easy break at the end
+    while i < len(lines):
+        j = 0
+        while j < len(lines[0]):
+            if lines[i][j] == '^':
+                c = [i, j]
+                i = len(lines)
+                j = len(lines)
+            j += 1
+        i += 1
+    # Get all positions
+    originalc = c
+    oob = False
+    posdata = []
+    idxdata = []
+    dir = dirs[idx]
+    while not oob:
+        # See if we're out of bounds
+        if (c[0] + dir[0]) >= len(lines) or (c[1] + dir[1]) >= len(lines[0]) or (c[0] + dir[0]) < 0 or (c[1] + dir[1]) < 0:
+            oob = True
+            break
+        # See if we hit a wall
+        if lines[c[0] + dir[0]][c[1] + dir[1]] == '#':
+            # Mark the new direction
+            idx = (idx + 1) % 4
+            dir = dirs[idx]
+            # Add to posdata
+            posdata.append(c)
+            idxdata.append(idx)
+        else:
+            c = [c[0] + dir[0], c[1] + dir[1]]
+            # Add to posdata
+            posdata.append(c)
+            idxdata.append(idx)
+    # Now go through each position
+    total = 0
+    allblockers = []
+    for i in range(len(posdata) - 1):
+        newlines = copy.deepcopy(lines)
+        counter = 0
+        c = posdata[i]
+        target = c
+        idx = idxdata[i]
+        dir = dirs[idx]
+        targetdir = dir
+        # If the next position is the starting point or a blocker, ignore it
+        if newlines[c[0] + dir[0]][c[1] + dir[1]] in ('#', '^'):
+            continue
+        newlines[c[0] + dir[0]][c[1] + dir[1]] = '#'
+        blockerpos = [c[0] + dir[0], c[1] + dir[1]]
+        if blockerpos in allblockers:
+            continue
+        allblockers.append(blockerpos)
+        # Change direction
+        idx = (idx + 1) % 4
+        dir = dirs[idx]
+        oob = False
+        visit_data = []
+        while (not oob) and counter < 10000:
+            newlines[c[0]][c[1]] = 'X'
+            # Check if we're on the right spot and in the right direction
+            if [c, dir] in visit_data:
+                total += 1
+                break
+            visit_data.append([c, dir])
+            # See if we're out of bounds
+            if (c[0] + dir[0]) >= len(newlines) or (c[1] + dir[1]) >= len(newlines[0]) or (c[0] + dir[0]) < 0 or (c[1] + dir[1]) < 0:
+                oob = True
+                break
+            # See if we hit a wall
+            if newlines[c[0] + dir[0]][c[1] + dir[1]] == '#':
+                # Mark the new direction and try again
+                idx = (idx + 1) % 4
+                dir = dirs[idx]
+            else:
+                # Iterate
+                c = [c[0] + dir[0], c[1] + dir[1]]
+            # Add to counter
+            counter += 1
+        print("%d/%d" % (i, len(posdata)))
+
+    print(total)
+
+
+day6p2()
