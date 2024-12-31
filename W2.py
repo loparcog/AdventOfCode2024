@@ -220,8 +220,86 @@ def day9p2():
     print(total)
 
 
-def day10p1():
-    print("A")
+def day10():
+    f = open("day10.txt", "r")
+    data = f.read()
+    # Split every line
+    lines = data.split("\n")
+    # Store it in a 2D array
+    topmap = []
+    for l in lines:
+        row = list(l)
+        topmap.append([int(x) for x in row])
+    # Store trailhead scores
+    trailheads = []
+    for y in range(len(topmap)):
+        for x in range(len(topmap[0])):
+            if topmap[y][x] == 0:
+                trailheads.append(findNine(topmap, [y, x]))
+    total1 = 0
+    total2 = 0
+    for head in trailheads:
+        # Get the length of the set and add it to the total
+        total1 += len(set([tuple(x) for x in head]))
+        # Ignore uniqueness for part 2
+        total2 += len(head)
+    print("Day 1: %s" % total1)
+    print("Dat 2: %s" % total2)
 
 
-day10p1()
+def findNine(topmap, coord):
+    outlist = []
+    y = coord[0]
+    x = coord[1]
+    curr = topmap[y][x]
+    if curr == 9:
+        # We found a 9!
+        return [[y, x]]
+    # Look all around it and make sure it doesn't go beyond bounds
+    if (x - 1 >= 0) and (topmap[y][x-1] == curr + 1):
+        # Recursively go at it again
+        outlist += findNine(topmap, [y, x-1])
+    # Do it again!
+    if (x + 1 < len(topmap[0])) and (topmap[y][x+1] == curr + 1):
+        outlist += findNine(topmap, [y, x+1])
+    if (y - 1 >= 0) and (topmap[y-1][x] == curr + 1):
+        outlist += findNine(topmap, [y-1, x])
+    if (y + 1 < len(topmap)) and (topmap[y+1][x] == curr + 1):
+        outlist += findNine(topmap, [y+1, x])
+    # Return the list
+    return outlist
+
+
+def day11():
+    f = open("day11.txt", "r")
+    data = f.read()
+    # Split every space
+    lines = data.split(" ")
+    rocks = [int(x) for x in lines]
+    blinks = 25
+    # Loop for each blink
+    for blink in range(blinks):
+        print(blink)
+        # Look at each rock
+        i = 0
+        while i < len(rocks):
+            # Rule 1
+            if rocks[i] == 0:
+                rocks[i] = 1
+            # Rule 2
+            elif len(str(rocks[i])) % 2 == 0:
+                # Split the string
+                id = str(rocks[i])
+                split = len(id) // 2
+                rocks[i] = int(id[:split])
+                rocks.insert(i+1, int(id[split:]))
+                # Skip this new rock
+                i += 1
+            # Rule 3
+            else:
+                rocks[i] *= 2024
+            i += 1
+    print("Pebbles after %s blinks: %s" % (blinks, len(rocks)))
+
+
+day11()
