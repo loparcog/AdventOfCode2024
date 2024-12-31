@@ -162,6 +162,8 @@ def day9p2():
     for i in range(len(data)):
         if data[i] == '0':
             # Ignore this
+            if not i % 2:
+                id += 1
             continue
         if i % 2:
             # This is free space, just store the int
@@ -173,14 +175,18 @@ def day9p2():
             id += 1
     # We now have the data line
     i = len(dline) - 1
+    id -= 1
     while i > 0:
-        print(i)
         if dline[i][0] == '.':
             # Ignore free space
             i -= 1
             continue
+        if dline[i][0] > id:
+            i -= 1
+            continue
+        id -= 1
         freeSpace = next((x for x in dline if x[0] == '.'), None)
-        freeIdx = 0
+        freeIdx = -1
         while freeSpace != None:
             # Get the index
             freeIdx += dline[freeIdx+1:].index(freeSpace) + 1
@@ -195,22 +201,27 @@ def day9p2():
                 dline.insert(freeIdx, dline[i][:])
                 # Replace the original for free space
                 dline[i+1][0] = '.'
+                i += 1
                 break
             else:
                 # Get next free space
                 freeSpace = next(
                     (x for x in dline[freeIdx+1:] if (x[0] == '.' and x[1] > 0)), None)
         i -= 1
-    outputLine = ''
-    for elem in dline:
-        outputLine += str(elem[0]) * elem[1]
     i = 0
     total = 0
-    while i < len(outputLine):
-        if outputLine[i] != '.':
-            total += int(outputLine[i]) * i
-        i += 1
+    for elem in dline:
+        if elem[0] == '.':
+            i += elem[1]
+        else:
+            for j in range(i, i + elem[1]):
+                total += j * elem[0]
+            i += elem[1]
     print(total)
 
 
-day9p2()
+def day10p1():
+    print("A")
+
+
+day10p1()
